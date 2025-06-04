@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html ng-app="todoApp">
+<head>
+    <title>Multi-User Todo List</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container" ng-controller="AuthController">
+        <!-- Login Section -->
+        <div ng-if="!user" class="text-center mt-5">
+            <h2>Welcome to Multi-User Todo List</h2>
+            <div class="alert alert-danger" ng-if="authError">
+                {{authError}}
+            </div>
+            <button class="btn btn-primary" ng-click="login()">Login with Google</button>
+        </div>
+
+        <!-- Main App Section -->
+        <div ng-if="user">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+                <a class="navbar-brand">Todo List</a>
+                <div class="navbar-nav ml-auto">
+                    <span class="nav-item nav-link">Welcome, {{user.displayName}}</span>
+                    <button class="btn btn-outline-danger" ng-click="logout()">Logout</button>
+                </div>
+            </nav>
+
+            <!-- Todo Lists Section -->
+            <div ng-controller="TodoListController">
+                <div class="alert alert-danger" ng-if="dbError">
+                    {{dbError}}
+                </div>
+                <div class="row">
+                    <!-- Create New List -->
+                    <div class="col-md-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">Create New List</h5>
+                                <form ng-submit="createList()">
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" ng-model="newList.name" placeholder="List Name" required>
+                                    </div>
+                                    <div class="form-check mb-3">
+                                        <input type="checkbox" class="form-check-input" ng-model="newList.isPublic">
+                                        <label class="form-check-label">Public List</label>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary">Create List</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lists -->
+                    <div class="col-md-8">
+                        <div class="card mb-3" ng-repeat="list in lists">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">{{list.name}}</h5>
+                                <span class="badge" ng-class="{'badge-success': list.isPublic, 'badge-secondary': !list.isPublic}">
+                                    {{list.isPublic ? 'Public' : 'Private'}}
+                                </span>
+                            </div>
+                            <div class="card-body">
+                                <!-- Add Todo Item -->
+                                <form ng-submit="addTodoItem(list)" class="mb-3">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" ng-model="newTodoItems[list.id]" placeholder="Add new item" required>
+                                        <div class="input-group-append">
+                                            <button type="submit" class="btn btn-primary">Add</button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                <!-- Todo Items -->
+                                <ul class="list-group">
+                                    <li class="list-group-item" ng-repeat="item in list.items">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <input type="checkbox" ng-model="item.completed" ng-change="updateItem(list, item)">
+                                                <span ng-class="{'text-muted': item.completed}">{{item.text}}</span>
+                                            </div>
+                                            <div class="btn-group">
+                                                <button class="btn btn-sm btn-outline-primary" ng-click="assignItem(list, item)">
+                                                    Assign
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-danger" ng-click="removeItem(list, item)">
+                                                    Remove
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted" ng-if="item.assignedTo">
+                                            Assigned to: {{item.assignedTo}}
+                                        </small>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+</body>
+</html> 
